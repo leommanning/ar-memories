@@ -8,8 +8,8 @@
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image.prod.js"></script>
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
-  <!-- Add jsPDF for PDF generation -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Add jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
   
   <style>
     * {
@@ -251,12 +251,14 @@
       border: 4px solid #a6b4a4;
       margin-bottom: 30px;
       box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      background-color: #e0e0e0;
     }
     
     .portrait-frame img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      display: block;
     }
     
     .view-memory-btn {
@@ -336,8 +338,13 @@
       position: absolute;
       bottom: 30px;
       left: 30px;
-      z-index: 2000;
+      z-index: 5001;
       pointer-events: auto;
+      display: none;
+    }
+    
+    #download-btn-container.visible {
+      display: block;
     }
     
     .download-btn {
@@ -362,10 +369,6 @@
       background: #1e2b20;
       transform: translateY(-2px);
       box-shadow: 0 10px 20px rgba(0,0,0,0.25);
-    }
-    
-    .download-btn:active {
-      transform: translateY(0);
     }
     
     .download-icon {
@@ -452,7 +455,7 @@
       <div class="memory-card" id="memoryCard">
         <div class="card-front">
           <div class="portrait-frame">
-            <img src="https://static.wixstatic.com/media/42e05c_12592fc2a93e4bf0b1e30417fc3a3694~mv2.png" alt="Portrait" id="studentPortrait">
+            <img src="" alt="Student Portrait" id="studentPortrait">
           </div>
           <button class="view-memory-btn" id="viewMemoryBtn">View Memory</button>
         </div>
@@ -498,7 +501,6 @@
     
     <!-- Photo Target -->
     <a-entity id="photo-target" mindar-image-target="targetIndex: 0">
-      <!-- Invisible trigger element -->
       <a-plane
         width="2.0"
         height="1.33"
@@ -613,6 +615,7 @@
     const bestFriend = document.getElementById('bestFriend');
     
     // Download button
+    const downloadBtnContainer = document.getElementById('download-btn-container');
     const downloadBtn = document.getElementById('downloadBookletBtn');
     
     // Scene elements
@@ -622,47 +625,55 @@
     const image4Scene = document.getElementById('scene-image4');
     const allScenes = [photoScene, image1Scene, image2Scene, image4Scene];
     
-    // Memory data for different targets - linking .mind files to photos and student info
+    // Memory data for different targets
     const memoryData = {
       photo: {
         studentName: 'Student Name',
-        portrait: 'https://static.wixstatic.com/media/42e05c_12592fc2a93e4bf0b1e30417fc3a3694~mv2.png',
+        portrait: './photo1.jpg',
         favoriteThing: 'Art Class',
         favoriteSubject: 'Science',
         favoriteTeacher: 'Mrs. Smith',
         bestFriend: 'Alex',
         mindFile: 'photo.mind',
-        photoFile: 'photo1.jpg'
+        photoFile: 'photo1.jpg',
+        schoolYear: '2024',
+        class: 'Year 3'
       },
       image1: {
         studentName: 'Emma',
-        portrait: 'https://static.wixstatic.com/media/42e05c_12592fc2a93e4bf0b1e30417fc3a3694~mv2.png',
+        portrait: './photo1.jpg',
         favoriteThing: 'Music Lessons',
         favoriteSubject: 'Math',
         favoriteTeacher: 'Mr. Johnson',
         bestFriend: 'Olivia',
         mindFile: 'image1.mind',
-        photoFile: 'photo1.jpg'
+        photoFile: 'photo1.jpg',
+        schoolYear: '2024',
+        class: 'Year 3'
       },
       image2: {
         studentName: 'James',
-        portrait: 'https://static.wixstatic.com/media/42e05c_12592fc2a93e4bf0b1e30417fc3a3694~mv2.png',
+        portrait: './photo2.jpg',
         favoriteThing: 'Sports Day',
         favoriteSubject: 'Physical Education',
         favoriteTeacher: 'Coach Roberts',
         bestFriend: 'William',
         mindFile: 'image2.mind',
-        photoFile: 'photo2.jpg'
+        photoFile: 'photo2.jpg',
+        schoolYear: '2024',
+        class: 'Year 4'
       },
       image4: {
         studentName: 'Sophie',
-        portrait: 'https://static.wixstatic.com/media/42e05c_12592fc2a93e4bf0b1e30417fc3a3694~mv2.png',
+        portrait: './photo4.jpg',
         favoriteThing: 'Reading Time',
         favoriteSubject: 'English',
         favoriteTeacher: 'Ms. Davis',
         bestFriend: 'Isabella',
         mindFile: 'image4.mind',
-        photoFile: 'photo4.jpg'
+        photoFile: 'photo4.jpg',
+        schoolYear: '2024',
+        class: 'Year 5'
       }
     };
     
@@ -694,13 +705,11 @@
           audio: false 
         });
         
-        // Stop all tracks immediately - we just needed permission
         stream.getTracks().forEach(track => track.stop());
         
         cameraPermission = true;
         cameraPrompt.style.display = 'none';
         
-        // Show all scenes
         allScenes.forEach(scene => {
           scene.classList.add('visible');
         });
@@ -733,7 +742,15 @@
     // Function to update memory card with target data
     function updateMemoryCard(target) {
       const data = memoryData[target] || memoryData.photo;
+      
       studentPortrait.src = data.portrait;
+      studentPortrait.alt = `${data.studentName}'s portrait`;
+      
+      studentPortrait.onerror = function() {
+        console.log('Error loading image:', data.portrait);
+        this.src = 'https://static.wixstatic.com/media/42e05c_12592fc2a93e4bf0b1e30417fc3a3694~mv2.png';
+      };
+      
       favoriteThing.textContent = data.favoriteThing;
       favoriteSubject.textContent = data.favoriteSubject;
       favoriteTeacher.textContent = data.favoriteTeacher;
@@ -745,13 +762,10 @@
       if (memoryModal.style.display === 'flex') return;
       
       updateMemoryCard(target);
-      currentTarget = target; // Set current target for download button
+      currentTarget = target;
       memoryModal.style.display = 'flex';
-      
-      // Reset card to front
+      downloadBtnContainer.classList.add('visible');
       memoryCard.classList.remove('flipped');
-      
-      // Add pulse animation to scan box
       scanBox.classList.add('detected');
       scanBox.classList.add('pulse');
     }
@@ -760,100 +774,78 @@
     function hideMemoryModal() {
       memoryModal.style.display = 'none';
       memoryCard.classList.remove('flipped');
+      downloadBtnContainer.classList.remove('visible');
     }
     
-    // Close modal button
     closeModalBtn.addEventListener('click', hideMemoryModal);
     
-    // Click on modal background to close
     memoryModal.addEventListener('click', (e) => {
       if (e.target === memoryModal) {
         hideMemoryModal();
       }
     });
     
-    // View Memory button click - flips the card
     viewMemoryBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       memoryCard.classList.add('flipped');
     });
     
-    // Click on card to flip back
     memoryCard.addEventListener('click', () => {
       memoryCard.classList.toggle('flipped');
     });
     
-    // Scene event listeners
     function setupSceneListeners(scene, targetName) {
       scene.addEventListener('targetFound', () => {
-        console.log(`Target found: ${targetName}`);
         targetFound = true;
         showMemoryModal(targetName);
       });
       
       scene.addEventListener('targetLost', () => {
-        console.log(`Target lost: ${targetName}`);
         if (memoryModal.style.display !== 'flex') {
           targetFound = false;
           scanBox.classList.remove('detected');
           scanBox.classList.remove('pulse');
         }
       });
-      
-      scene.addEventListener('error', (error) => {
-        console.error(`Error with ${targetName} scene:`, error);
-      });
     }
     
-    // Setup all scenes
     setupSceneListeners(photoScene, 'photo');
     setupSceneListeners(image1Scene, 'image1');
     setupSceneListeners(image2Scene, 'image2');
     setupSceneListeners(image4Scene, 'image4');
     
-    // Track when scenes are loaded
     photoScene.addEventListener('loaded', () => {
-      console.log('Photo scene loaded');
       loadingEl.innerHTML = 'ready';
     });
     
-    // Scene cycling - only show one scene at a time for better performance
     let sceneIndex = 0;
     const scenes = ['photo', 'image1', 'image2', 'image4'];
     
     function setActiveScene(sceneName) {
       if (memoryModal.style.display === 'flex') return;
       
-      // Hide all scenes
       photoScene.style.display = 'none';
       image1Scene.style.display = 'none';
       image2Scene.style.display = 'none';
       image4Scene.style.display = 'none';
       
-      // Show the active scene
       if (sceneName === 'photo') {
         photoScene.style.display = 'block';
         activeScene = 'photo';
-        console.log('Active scene: photo');
       } else if (sceneName === 'image1') {
         image1Scene.style.display = 'block';
         activeScene = 'image1';
-        console.log('Active scene: image1');
       } else if (sceneName === 'image2') {
         image2Scene.style.display = 'block';
         activeScene = 'image2';
-        console.log('Active scene: image2');
       } else if (sceneName === 'image4') {
         image4Scene.style.display = 'block';
         activeScene = 'image4';
-        console.log('Active scene: image4');
       }
     }
     
-    // Start with photo scene
     setActiveScene('photo');
     
-    // Cycle through scenes every 3 seconds if no target found
     setInterval(() => {
       if (!targetFound && memoryModal.style.display !== 'flex' && cameraPermission) {
         sceneIndex = (sceneIndex + 1) % scenes.length;
@@ -861,129 +853,188 @@
       }
     }, 3000);
     
-    // Handle visibility change
     document.addEventListener('visibilitychange', () => {
       if (document.hidden && memoryModal.style.display === 'flex') {
         hideMemoryModal();
       }
     });
     
-    // PDF Generation for A4 foldable booklet
+    // PDF Generation with upside down top row - using simple approach
     function generateBookletPDF() {
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
-      
-      const data = memoryData[currentTarget] || memoryData.photo;
-      const pageWidth = 210; // A4 width in mm
-      const pageHeight = 297; // A4 height in mm
-      
-      // A6 dimensions (folded size)
-      const a6Width = 105; // Half of A4 width
-      const a6Height = 148.5; // Quarter of A4 height
-      
-      // Panel positions (for 4 panels - front, inside left, inside right, back)
-      const panels = [
-        { x: 0, y: 0, width: a6Width, height: a6Height }, // Front cover
-        { x: a6Width, y: 0, width: a6Width, height: a6Height }, // Inside left (signatures)
-        { x: 0, y: a6Height, width: a6Width, height: a6Height }, // Inside right (more signatures)
-        { x: a6Width, y: a6Height, width: a6Width, height: a6Height } // Back cover (memories)
-      ];
-      
-      // Panel 1: Front cover - Portrait
-      pdf.setFillColor(166, 180, 164); // #a6b4a4
-      pdf.rect(panels[0].x, panels[0].y, panels[0].width, panels[0].height, 'F');
-      
-      pdf.setFontSize(16);
-      pdf.setTextColor(255, 255, 255);
-      pdf.text('My Memory Book', panels[0].x + 15, panels[0].y + 30);
-      
-      pdf.setFontSize(12);
-      pdf.text(data.studentName, panels[0].x + 15, panels[0].y + 45);
-      pdf.text('Class of 2024', panels[0].x + 15, panels[0].y + 60);
-      
-      // Draw portrait circle placeholder
-      pdf.setDrawColor(255, 255, 255);
-      pdf.setFillColor(255, 255, 255);
-      pdf.circle(panels[0].x + a6Width/2, panels[0].y + a6Height/2 + 10, 25, 'FD');
-      
-      // Add note about AR trigger
-      pdf.setFontSize(8);
-      pdf.text('Scan the photo with', panels[0].x + 15, panels[0].y + a6Height - 20);
-      pdf.text('Braiswick AR app', panels[0].x + 15, panels[0].y + a6Height - 15);
-      
-      // Panel 2: Inside left - Signatures panel 1
-      pdf.setFillColor(245, 245, 245);
-      pdf.rect(panels[1].x, panels[1].y, panels[1].width, panels[1].height, 'F');
-      
-      pdf.setTextColor(44, 62, 47); // #2c3e2f
-      pdf.setFontSize(14);
-      pdf.text('Friends Signatures', panels[1].x + 15, panels[1].y + 20);
-      
-      // Draw signature lines
-      pdf.setDrawColor(166, 180, 164);
-      pdf.setLineWidth(0.5);
-      for (let i = 0; i < 6; i++) {
-        pdf.line(panels[1].x + 15, panels[1].y + 40 + (i * 15), panels[1].x + a6Width - 15, panels[1].y + 40 + (i * 15));
+      try {
+        // Get current student data
+        const data = memoryData[currentTarget] || memoryData.photo;
+        
+        // Create a new PDF
+        const doc = new jsPDF('landscape', 'mm', 'a4');
+        
+        // Panel dimensions
+        const panelW = 74.25; // 297/4
+        const panelH = 105; // 210/2
+        
+        // Draw colored panels
+        
+        // Bottom row (right way up) - Pages 1-4
+        doc.setFillColor(166, 180, 164);
+        doc.rect(0, panelH, panelW, panelH, 'F');
+        
+        doc.setFillColor(245, 245, 245);
+        doc.rect(panelW, panelH, panelW, panelH, 'F');
+        
+        doc.setFillColor(255, 255, 255);
+        doc.rect(panelW*2, panelH, panelW, panelH, 'F');
+        doc.rect(panelW*3, panelH, panelW, panelH, 'F');
+        
+        // Top row - Pages 5-8 (we'll add text upside down by positioning)
+        doc.setFillColor(245, 245, 245);
+        doc.rect(0, 0, panelW, panelH, 'F');
+        doc.rect(panelW, 0, panelW, panelH, 'F');
+        
+        doc.setFillColor(255, 255, 255);
+        doc.rect(panelW*2, 0, panelW, panelH, 'F');
+        
+        doc.setFillColor(138, 154, 135);
+        doc.rect(panelW*3, 0, panelW, panelH, 'F');
+        
+        // Add text to bottom row (right way up)
+        
+        // Panel 1 - Front Cover (Page 1)
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(16);
+        doc.text('My Memory', panelW/2, panelH + 30, { align: 'center' });
+        doc.text('Book', panelW/2, panelH + 50, { align: 'center' });
+        doc.setFontSize(12);
+        doc.text(data.studentName, panelW/2, panelH + 80, { align: 'center' });
+        doc.text(data.class, panelW/2, panelH + 95, { align: 'center' });
+        
+        // Photo circle
+        doc.setDrawColor(255, 255, 255);
+        doc.setFillColor(255, 255, 255);
+        doc.circle(panelW/2, panelH + 135, 20, 'FD');
+        
+        // Panel 2 - About Me (Page 2)
+        doc.setTextColor(44, 62, 47);
+        doc.setFontSize(14);
+        doc.text('About Me', panelW + 10, panelH + 20);
+        doc.setFontSize(10);
+        doc.text(`Name: ${data.studentName}`, panelW + 10, panelH + 45);
+        doc.text(`Class: ${data.class}`, panelW + 10, panelH + 60);
+        doc.text(`Year: ${data.schoolYear}`, panelW + 10, panelH + 75);
+        
+        // Panel 3 - Memories Left (Page 3)
+        doc.setTextColor(44, 62, 47);
+        doc.setFontSize(14);
+        doc.text('Memories', panelW*2 + 10, panelH + 20);
+        doc.setFontSize(10);
+        doc.text('Favorite:', panelW*2 + 10, panelH + 45);
+        doc.setTextColor(138, 154, 135);
+        doc.text(data.favoriteThing, panelW*2 + 10, panelH + 60);
+        doc.setTextColor(44, 62, 47);
+        doc.text('Subject:', panelW*2 + 10, panelH + 85);
+        doc.setTextColor(138, 154, 135);
+        doc.text(data.favoriteSubject, panelW*2 + 10, panelH + 100);
+        
+        // Panel 4 - Memories Right (Page 4)
+        doc.setTextColor(44, 62, 47);
+        doc.text('Teacher:', panelW*3 + 10, panelH + 30);
+        doc.setTextColor(138, 154, 135);
+        doc.text(data.favoriteTeacher, panelW*3 + 10, panelH + 45);
+        doc.setTextColor(44, 62, 47);
+        doc.text('Friend:', panelW*3 + 10, panelH + 70);
+        doc.setTextColor(138, 154, 135);
+        doc.text(data.bestFriend, panelW*3 + 10, panelH + 85);
+        
+        // TOP ROW - Add text upside down by positioning at bottom of panels
+        
+        // Panel 5 - Signatures Page 1 (Top Left) - upside down
+        doc.setTextColor(44, 62, 47);
+        doc.setFontSize(14);
+        doc.text('Friends', panelW/2, 70, { align: 'center' });
+        doc.text('Signatures', panelW/2, 85, { align: 'center' });
+        
+        // Signature lines
+        doc.setDrawColor(166, 180, 164);
+        doc.setLineWidth(0.3);
+        for (let i = 0; i < 5; i++) {
+          doc.line(10, 40 + (i * 12), panelW - 10, 40 + (i * 12));
+        }
+        
+        // Panel 6 - Signatures Page 2 (Top 2nd) - upside down
+        doc.setTextColor(44, 62, 47);
+        doc.setFontSize(14);
+        doc.text('More', panelW + panelW/2, 70, { align: 'center' });
+        doc.text('Signatures', panelW + panelW/2, 85, { align: 'center' });
+        
+        for (let i = 0; i < 5; i++) {
+          doc.line(panelW + 10, 40 + (i * 12), panelW*2 - 10, 40 + (i * 12));
+        }
+        
+        // Panel 7 - Messages (Top 3rd) - upside down
+        doc.setTextColor(44, 62, 47);
+        doc.setFontSize(14);
+        doc.text('Messages', panelW*2 + panelW/2, 60, { align: 'center' });
+        
+        // Message boxes
+        doc.setDrawColor(166, 180, 164);
+        doc.setFillColor(250, 250, 250);
+        doc.roundedRect(panelW*2 + 10, 25, panelW - 20, 15, 2, 2, 'FD');
+        doc.roundedRect(panelW*2 + 10, 45, panelW - 20, 15, 2, 2, 'FD');
+        doc.roundedRect(panelW*2 + 10, 65, panelW - 20, 15, 2, 2, 'FD');
+        
+        // Panel 8 - Back Cover (Top Right) - upside down
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(18);
+        doc.text('Braiswick', panelW*3 + panelW/2, 55, { align: 'center' });
+        doc.setFontSize(14);
+        doc.text(data.schoolYear, panelW*3 + panelW/2, 75, { align: 'center' });
+        doc.setFontSize(8);
+        doc.text('Scan for AR', panelW*3 + panelW/2, 95, { align: 'center' });
+        doc.text('memories', panelW*3 + panelW/2, 103, { align: 'center' });
+        
+        // Draw cut lines
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.2);
+        
+        // Vertical lines
+        for (let i = 1; i < 4; i++) {
+          doc.line(i * panelW, 0, i * panelW, 210);
+        }
+        
+        // Horizontal line
+        doc.line(0, panelH, 297, panelH);
+        
+        // Page numbers
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        
+        // Bottom row page numbers
+        doc.text('1', 5, 205);
+        doc.text('2', panelW + 5, 205);
+        doc.text('3', panelW*2 + 5, 205);
+        doc.text('4', panelW*3 + 5, 205);
+        
+        // Top row page numbers
+        doc.text('5', 5, 15);
+        doc.text('6', panelW + 5, 15);
+        doc.text('7', panelW*2 + 5, 15);
+        doc.text('8', panelW*3 + 5, 15);
+        
+        // Instructions
+        doc.setFontSize(8);
+        doc.setTextColor(100, 100, 100);
+        doc.text('Cut along lines. Stack in order 1-8. Staple left edge.', 10, 25);
+        
+        // Save
+        doc.save(`${data.studentName}_Memory_Booklet.pdf`);
+        
+        alert('PDF generated successfully!');
+        
+      } catch (error) {
+        console.error('PDF Error:', error);
+        alert('Error: ' + error.message);
       }
-      
-      // Panel 3: Inside right - Signatures panel 2
-      pdf.setFillColor(245, 245, 245);
-      pdf.rect(panels[2].x, panels[2].y, panels[2].width, panels[2].height, 'F');
-      
-      pdf.setTextColor(44, 62, 47);
-      pdf.setFontSize(14);
-      pdf.text('More Signatures', panels[2].x + 15, panels[2].y + 20);
-      
-      // Draw signature lines
-      for (let i = 0; i < 6; i++) {
-        pdf.line(panels[2].x + 15, panels[2].y + 40 + (i * 15), panels[2].x + a6Width - 15, panels[2].y + 40 + (i * 15));
-      }
-      
-      // Panel 4: Back cover - Memories
-      pdf.setFillColor(138, 154, 135); // #8a9a87
-      pdf.rect(panels[3].x, panels[3].y, panels[3].width, panels[3].height, 'F');
-      
-      pdf.setTextColor(255, 255, 255);
-      pdf.setFontSize(16);
-      pdf.text('2024 Memories', panels[3].x + 15, panels[3].y + 25);
-      
-      pdf.setFontSize(12);
-      pdf.text(`Favorite Thing:`, panels[3].x + 15, panels[3].y + 50);
-      pdf.text(data.favoriteThing, panels[3].x + 15, panels[3].y + 65);
-      
-      pdf.text(`Favorite Subject:`, panels[3].x + 15, panels[3].y + 90);
-      pdf.text(data.favoriteSubject, panels[3].x + 15, panels[3].y + 105);
-      
-      pdf.text(`Favorite Teacher:`, panels[3].x + 15, panels[3].y + 130);
-      pdf.text(data.favoriteTeacher, panels[3].x + 15, panels[3].y + 145);
-      
-      pdf.text(`Best Friend:`, panels[3].x + 15, panels[3].y + 170);
-      pdf.text(data.bestFriend, panels[3].x + 15, panels[3].y + 185);
-      
-      // Add AR trigger info
-      pdf.setFontSize(8);
-      pdf.text(`AR Trigger: ${data.photoFile}`, panels[3].x + 15, panels[3].y + a6Height - 15);
-      
-      // Add fold lines
-      pdf.setDrawColor(200, 200, 200);
-      pdf.setLineWidth(0.5);
-      pdf.setLineDashPattern([5, 5], 0);
-      
-      // Vertical fold line (middle of A4)
-      pdf.line(pageWidth/2, 0, pageWidth/2, pageHeight);
-      
-      // Horizontal fold line (middle of A4)
-      pdf.line(0, pageHeight/2, pageWidth, pageHeight/2);
-      
-      // Save the PDF
-      pdf.save(`${data.studentName.replace(/\s+/g, '_')}_memory_booklet.pdf`);
     }
     
-    // Download button click handler
     downloadBtn.addEventListener('click', generateBookletPDF);
   </script>
 </body>
