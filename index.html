@@ -111,6 +111,10 @@
       box-shadow: 0 15px 30px rgba(0,0,0,0.15);
     }
     
+    #camera-button:active {
+      transform: translateY(0);
+    }
+    
     #permission-status {
       margin-top: 20px;
       color: #2c3e2f;
@@ -479,20 +483,22 @@
     <button id="close-modal-btn">✕</button>
   </div>
 
-  <!-- AR Scene - Multiple Targets -->
+  <!-- AR Scene - Photo Target (photo.mind) -->
   <a-scene
-    id="scene"
+    id="scene-photo"
     mindar-image="imageTargetSrc: ./photo.mind; autoStart: true; uiLoading: no; uiError: no; uiScanning: no;"
     color-space="sRGB"
     embedded
     renderer="colorManagement: true"
     vr-mode-ui="enabled: false"
-    device-orientation-permission-ui="enabled: false">
+    device-orientation-permission-ui="enabled: false"
+    style="display: none;">
     
-    <a-camera id="camera" position="0 0 0" look-controls="enabled: false"></a-camera>
+    <a-camera id="camera-photo" position="0 0 0" look-controls="enabled: false"></a-camera>
     
     <!-- Photo Target -->
     <a-entity id="photo-target" mindar-image-target="targetIndex: 0">
+      <!-- Invisible trigger element -->
       <a-plane
         width="2.0"
         height="1.33"
@@ -503,7 +509,7 @@
     </a-entity>
   </a-scene>
 
-  <!-- Scene for Image 1 -->
+  <!-- AR Scene - Image 1 Target (image1.mind) -->
   <a-scene
     id="scene-image1"
     mindar-image="imageTargetSrc: ./image1.mind; autoStart: true; uiLoading: no; uiError: no; uiScanning: no;"
@@ -527,7 +533,7 @@
     </a-entity>
   </a-scene>
 
-  <!-- Scene for Image 2 -->
+  <!-- AR Scene - Image 2 Target (image2.mind) -->
   <a-scene
     id="scene-image2"
     mindar-image="imageTargetSrc: ./image2.mind; autoStart: true; uiLoading: no; uiError: no; uiScanning: no;"
@@ -551,7 +557,7 @@
     </a-entity>
   </a-scene>
 
-  <!-- Scene for Image 4 -->
+  <!-- AR Scene - Image 4 Target (image4.mind) -->
   <a-scene
     id="scene-image4"
     mindar-image="imageTargetSrc: ./image4.mind; autoStart: true; uiLoading: no; uiError: no; uiScanning: no;"
@@ -610,13 +616,13 @@
     const downloadBtn = document.getElementById('downloadBookletBtn');
     
     // Scene elements
-    const photoScene = document.getElementById('scene');
+    const photoScene = document.getElementById('scene-photo');
     const image1Scene = document.getElementById('scene-image1');
     const image2Scene = document.getElementById('scene-image2');
     const image4Scene = document.getElementById('scene-image4');
     const allScenes = [photoScene, image1Scene, image2Scene, image4Scene];
     
-    // Memory data for different targets
+    // Memory data for different targets - linking .mind files to photos and student info
     const memoryData = {
       photo: {
         studentName: 'Student Name',
@@ -625,6 +631,7 @@
         favoriteSubject: 'Science',
         favoriteTeacher: 'Mrs. Smith',
         bestFriend: 'Alex',
+        mindFile: 'photo.mind',
         photoFile: 'photo1.jpg'
       },
       image1: {
@@ -633,7 +640,8 @@
         favoriteThing: 'Music Lessons',
         favoriteSubject: 'Math',
         favoriteTeacher: 'Mr. Johnson',
-        bestFriend: 'Emma',
+        bestFriend: 'Olivia',
+        mindFile: 'image1.mind',
         photoFile: 'photo1.jpg'
       },
       image2: {
@@ -642,7 +650,8 @@
         favoriteThing: 'Sports Day',
         favoriteSubject: 'Physical Education',
         favoriteTeacher: 'Coach Roberts',
-        bestFriend: 'James',
+        bestFriend: 'William',
+        mindFile: 'image2.mind',
         photoFile: 'photo2.jpg'
       },
       image4: {
@@ -651,7 +660,8 @@
         favoriteThing: 'Reading Time',
         favoriteSubject: 'English',
         favoriteTeacher: 'Ms. Davis',
-        bestFriend: 'Sophie',
+        bestFriend: 'Isabella',
+        mindFile: 'image4.mind',
         photoFile: 'photo4.jpg'
       }
     };
@@ -684,11 +694,13 @@
           audio: false 
         });
         
+        // Stop all tracks immediately - we just needed permission
         stream.getTracks().forEach(track => track.stop());
         
         cameraPermission = true;
         cameraPrompt.style.display = 'none';
         
+        // Show all scenes
         allScenes.forEach(scene => {
           scene.classList.add('visible');
         });
@@ -733,6 +745,7 @@
       if (memoryModal.style.display === 'flex') return;
       
       updateMemoryCard(target);
+      currentTarget = target; // Set current target for download button
       memoryModal.style.display = 'flex';
       
       // Reset card to front
@@ -773,17 +786,22 @@
     // Scene event listeners
     function setupSceneListeners(scene, targetName) {
       scene.addEventListener('targetFound', () => {
+        console.log(`Target found: ${targetName}`);
         targetFound = true;
-        currentTarget = targetName;
         showMemoryModal(targetName);
       });
       
       scene.addEventListener('targetLost', () => {
+        console.log(`Target lost: ${targetName}`);
         if (memoryModal.style.display !== 'flex') {
           targetFound = false;
           scanBox.classList.remove('detected');
           scanBox.classList.remove('pulse');
         }
+      });
+      
+      scene.addEventListener('error', (error) => {
+        console.error(`Error with ${targetName} scene:`, error);
       });
     }
     
@@ -793,39 +811,49 @@
     setupSceneListeners(image2Scene, 'image2');
     setupSceneListeners(image4Scene, 'image4');
     
+    // Track when scenes are loaded
     photoScene.addEventListener('loaded', () => {
+      console.log('Photo scene loaded');
       loadingEl.innerHTML = 'ready';
     });
     
-    // Scene cycling
+    // Scene cycling - only show one scene at a time for better performance
     let sceneIndex = 0;
     const scenes = ['photo', 'image1', 'image2', 'image4'];
     
     function setActiveScene(sceneName) {
       if (memoryModal.style.display === 'flex') return;
       
+      // Hide all scenes
       photoScene.style.display = 'none';
       image1Scene.style.display = 'none';
       image2Scene.style.display = 'none';
       image4Scene.style.display = 'none';
       
+      // Show the active scene
       if (sceneName === 'photo') {
         photoScene.style.display = 'block';
         activeScene = 'photo';
+        console.log('Active scene: photo');
       } else if (sceneName === 'image1') {
         image1Scene.style.display = 'block';
         activeScene = 'image1';
+        console.log('Active scene: image1');
       } else if (sceneName === 'image2') {
         image2Scene.style.display = 'block';
         activeScene = 'image2';
+        console.log('Active scene: image2');
       } else if (sceneName === 'image4') {
         image4Scene.style.display = 'block';
         activeScene = 'image4';
+        console.log('Active scene: image4');
       }
     }
     
+    // Start with photo scene
     setActiveScene('photo');
     
+    // Cycle through scenes every 3 seconds if no target found
     setInterval(() => {
       if (!targetFound && memoryModal.style.display !== 'flex' && cameraPermission) {
         sceneIndex = (sceneIndex + 1) % scenes.length;
@@ -935,6 +963,10 @@
       
       pdf.text(`Best Friend:`, panels[3].x + 15, panels[3].y + 170);
       pdf.text(data.bestFriend, panels[3].x + 15, panels[3].y + 185);
+      
+      // Add AR trigger info
+      pdf.setFontSize(8);
+      pdf.text(`AR Trigger: ${data.photoFile}`, panels[3].x + 15, panels[3].y + a6Height - 15);
       
       // Add fold lines
       pdf.setDrawColor(200, 200, 200);
