@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Braiswick Memory Cards</title>
+  <title>Braiswick Memory Cards - Photo Booklet</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   
   <!-- Import libraries -->
@@ -9,9 +9,10 @@
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
   <!-- Add jsPDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   
   <style>
+    /* (keep all your existing styles - they're perfect) */
     * {
       margin: 0;
       padding: 0;
@@ -426,12 +427,11 @@
   </style>
 </head>
 <body>
-  <!-- Splash Screen -->
+  <!-- All your existing HTML structure stays exactly the same -->
   <div id="splash-screen">
     <img src="https://static.wixstatic.com/media/42e05c_12592fc2a93e4bf0b1e30417fc3a3694~mv2.png" alt="Braiswick" class="splash-logo">
   </div>
 
-  <!-- Camera Permission Prompt -->
   <div id="camera-prompt">
     <div class="camera-prompt-content">
       <img src="https://static.wixstatic.com/media/42e05c_12592fc2a93e4bf0b1e30417fc3a3694~mv2.png" alt="Braiswick" class="prompt-logo">
@@ -441,15 +441,13 @@
     </div>
   </div>
 
-  <!-- Download Button -->
   <div id="download-btn-container">
     <button class="download-btn" id="downloadBookletBtn">
       <span class="download-icon">📖</span>
-      <span>Download Memory Booklet</span>
+      <span>Download Photo Booklet</span>
     </button>
   </div>
 
-  <!-- Memory Card Modal -->
   <div id="memory-card-modal">
     <div class="memory-card-container" id="memoryCardContainer">
       <div class="memory-card" id="memoryCard">
@@ -486,7 +484,7 @@
     <button id="close-modal-btn">✕</button>
   </div>
 
-  <!-- AR Scene - Photo Target (photo.mind) -->
+  <!-- AR Scene elements (keep all your existing a-scene tags) -->
   <a-scene
     id="scene-photo"
     mindar-image="imageTargetSrc: ./photo.mind; autoStart: true; uiLoading: no; uiError: no; uiScanning: no;"
@@ -496,22 +494,14 @@
     vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: false"
     style="display: none;">
-    
     <a-camera id="camera-photo" position="0 0 0" look-controls="enabled: false"></a-camera>
-    
-    <!-- Photo Target -->
     <a-entity id="photo-target" mindar-image-target="targetIndex: 0">
-      <a-plane
-        width="2.0"
-        height="1.33"
-        position="0 0.5 0"
-        rotation="0 0 0"
-        material="transparent: true; opacity: 0;">
-      </a-plane>
+      <a-plane width="2.0" height="1.33" position="0 0.5 0" rotation="0 0 0" material="transparent: true; opacity: 0;"></a-plane>
     </a-entity>
   </a-scene>
 
-  <!-- AR Scene - Image 1 Target (image1.mind) -->
+  <!-- ... (keep all other a-scene elements for image1, image2, image4) ... -->
+  
   <a-scene
     id="scene-image1"
     mindar-image="imageTargetSrc: ./image1.mind; autoStart: true; uiLoading: no; uiError: no; uiScanning: no;"
@@ -521,21 +511,12 @@
     vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: false"
     style="display: none;">
-    
     <a-camera id="camera-image1" position="0 0 0" look-controls="enabled: false"></a-camera>
-    
     <a-entity id="image1-target" mindar-image-target="targetIndex: 0">
-      <a-plane
-        width="2.0"
-        height="1.33"
-        position="0 0.5 0"
-        rotation="0 0 0"
-        material="transparent: true; opacity: 0;">
-      </a-plane>
+      <a-plane width="2.0" height="1.33" position="0 0.5 0" rotation="0 0 0" material="transparent: true; opacity: 0;"></a-plane>
     </a-entity>
   </a-scene>
 
-  <!-- AR Scene - Image 2 Target (image2.mind) -->
   <a-scene
     id="scene-image2"
     mindar-image="imageTargetSrc: ./image2.mind; autoStart: true; uiLoading: no; uiError: no; uiScanning: no;"
@@ -545,21 +526,12 @@
     vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: false"
     style="display: none;">
-    
     <a-camera id="camera-image2" position="0 0 0" look-controls="enabled: false"></a-camera>
-    
     <a-entity id="image2-target" mindar-image-target="targetIndex: 0">
-      <a-plane
-        width="2.0"
-        height="1.33"
-        position="0 0.5 0"
-        rotation="0 0 0"
-        material="transparent: true; opacity: 0;">
-      </a-plane>
+      <a-plane width="2.0" height="1.33" position="0 0.5 0" rotation="0 0 0" material="transparent: true; opacity: 0;"></a-plane>
     </a-entity>
   </a-scene>
 
-  <!-- AR Scene - Image 4 Target (image4.mind) -->
   <a-scene
     id="scene-image4"
     mindar-image="imageTargetSrc: ./image4.mind; autoStart: true; uiLoading: no; uiError: no; uiScanning: no;"
@@ -569,21 +541,12 @@
     vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: false"
     style="display: none;">
-    
     <a-camera id="camera-image4" position="0 0 0" look-controls="enabled: false"></a-camera>
-    
     <a-entity id="image4-target" mindar-image-target="targetIndex: 0">
-      <a-plane
-        width="2.0"
-        height="1.33"
-        position="0 0.5 0"
-        rotation="0 0 0"
-        material="transparent: true; opacity: 0;">
-      </a-plane>
+      <a-plane width="2.0" height="1.33" position="0 0.5 0" rotation="0 0 0" material="transparent: true; opacity: 0;"></a-plane>
     </a-entity>
   </a-scene>
 
-  <!-- UI Overlay -->
   <div id="ui-overlay">
     <div class="scan-container">
       <div class="scan-box" id="scanBox"></div>
@@ -593,6 +556,7 @@
   <div id="loading">initializing</div>
 
   <script>
+    // All your existing JavaScript setup (UI Elements, memoryData, etc.) stays exactly the same
     // UI Elements
     const splashScreen = document.getElementById('splash-screen');
     const scanBox = document.getElementById('scanBox');
@@ -858,180 +822,126 @@
         hideMemoryModal();
       }
     });
+
+    // ===== SIMPLIFIED PDF GENERATION USING YOUR JPG TEMPLATE =====
     
-    // PDF Generation with upside down top row - using simple approach
-    function generateBookletPDF() {
+    // Function to load image
+    function loadImage(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+      });
+    }
+    
+    // Function to rotate image 90 degrees clockwise
+    function rotateImage(img) {
+      return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = img.height;
+        canvas.height = img.width;
+        
+        ctx.translate(canvas.width/2, canvas.height/2);
+        ctx.rotate(90 * Math.PI/180);
+        ctx.drawImage(img, -img.width/2, -img.height/2);
+        
+        canvas.toBlob((blob) => {
+          const url = URL.createObjectURL(blob);
+          const rotatedImg = new Image();
+          rotatedImg.onload = () => {
+            URL.revokeObjectURL(url);
+            resolve(rotatedImg);
+          };
+          rotatedImg.src = url;
+        }, 'image/jpeg', 0.95);
+      });
+    }
+    
+    // PDF GENERATION - Using your JPG template
+    async function generateBookletPDF() {
       try {
         // Get current student data
         const data = memoryData[currentTarget] || memoryData.photo;
         
-        // Create a new PDF
-        const doc = new jsPDF('landscape', 'mm', 'a4');
+        // Show loading message
+        loadingEl.innerHTML = 'generating PDF...';
         
-        // Panel dimensions
-        const panelW = 74.25; // 297/4
-        const panelH = 105; // 210/2
+        // Load the student photo
+        const photoImg = await loadImage(data.portrait);
         
-        // Draw colored panels
+        // Rotate photo 90 degrees clockwise (as you requested)
+        const rotatedPhoto = await rotateImage(photoImg);
         
-        // Bottom row (right way up) - Pages 1-4
-        doc.setFillColor(166, 180, 164);
-        doc.rect(0, panelH, panelW, panelH, 'F');
+        // Load your beautiful JPG template
+        const templateImg = await loadImage('https://static.wixstatic.com/media/42e05c_f053990bf15d491cbaecd492cd2ba669~mv2.jpg');
         
-        doc.setFillColor(245, 245, 245);
-        doc.rect(panelW, panelH, panelW, panelH, 'F');
+        // Create a new PDF - A4 PORTRAIT at 300 DPI
+        const doc = new jspdf.jsPDF({
+          orientation: 'portrait',
+          unit: 'px',
+          format: [2480, 3508] // 300 DPI A4
+        });
         
-        doc.setFillColor(255, 255, 255);
-        doc.rect(panelW*2, panelH, panelW, panelH, 'F');
-        doc.rect(panelW*3, panelH, panelW, panelH, 'F');
+        // Add your template as the background
+        doc.addImage(templateImg, 'JPEG', 0, 0, 2480, 3508);
         
-        // Top row - Pages 5-8 (we'll add text upside down by positioning)
-        doc.setFillColor(245, 245, 245);
-        doc.rect(0, 0, panelW, panelH, 'F');
-        doc.rect(panelW, 0, panelW, panelH, 'F');
+        // Convert rotated photo to data URL
+        const photoCanvas = document.createElement('canvas');
+        photoCanvas.width = rotatedPhoto.width;
+        photoCanvas.height = rotatedPhoto.height;
+        const photoCtx = photoCanvas.getContext('2d');
+        photoCtx.drawImage(rotatedPhoto, 0, 0);
+        const photoDataUrl = photoCanvas.toDataURL('image/jpeg', 0.95);
         
-        doc.setFillColor(255, 255, 255);
-        doc.rect(panelW*2, 0, panelW, panelH, 'F');
+        // Add the student photo at the exact coordinates you specified
+        // Left: 196px, Top: 1058px, Width: 634px, Height: 503px
+        doc.addImage(photoDataUrl, 'JPEG', 196, 1058, 634, 503);
         
-        doc.setFillColor(138, 154, 135);
-        doc.rect(panelW*3, 0, panelW, panelH, 'F');
-        
-        // Add text to bottom row (right way up)
-        
-        // Panel 1 - Front Cover (Page 1)
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(16);
-        doc.text('My Memory', panelW/2, panelH + 30, { align: 'center' });
-        doc.text('Book', panelW/2, panelH + 50, { align: 'center' });
-        doc.setFontSize(12);
-        doc.text(data.studentName, panelW/2, panelH + 80, { align: 'center' });
-        doc.text(data.class, panelW/2, panelH + 95, { align: 'center' });
-        
-        // Photo circle
-        doc.setDrawColor(255, 255, 255);
-        doc.setFillColor(255, 255, 255);
-        doc.circle(panelW/2, panelH + 135, 20, 'FD');
-        
-        // Panel 2 - About Me (Page 2)
-        doc.setTextColor(44, 62, 47);
-        doc.setFontSize(14);
-        doc.text('About Me', panelW + 10, panelH + 20);
-        doc.setFontSize(10);
-        doc.text(`Name: ${data.studentName}`, panelW + 10, panelH + 45);
-        doc.text(`Class: ${data.class}`, panelW + 10, panelH + 60);
-        doc.text(`Year: ${data.schoolYear}`, panelW + 10, panelH + 75);
-        
-        // Panel 3 - Memories Left (Page 3)
-        doc.setTextColor(44, 62, 47);
-        doc.setFontSize(14);
-        doc.text('Memories', panelW*2 + 10, panelH + 20);
-        doc.setFontSize(10);
-        doc.text('Favorite:', panelW*2 + 10, panelH + 45);
-        doc.setTextColor(138, 154, 135);
-        doc.text(data.favoriteThing, panelW*2 + 10, panelH + 60);
-        doc.setTextColor(44, 62, 47);
-        doc.text('Subject:', panelW*2 + 10, panelH + 85);
-        doc.setTextColor(138, 154, 135);
-        doc.text(data.favoriteSubject, panelW*2 + 10, panelH + 100);
-        
-        // Panel 4 - Memories Right (Page 4)
-        doc.setTextColor(44, 62, 47);
-        doc.text('Teacher:', panelW*3 + 10, panelH + 30);
-        doc.setTextColor(138, 154, 135);
-        doc.text(data.favoriteTeacher, panelW*3 + 10, panelH + 45);
-        doc.setTextColor(44, 62, 47);
-        doc.text('Friend:', panelW*3 + 10, panelH + 70);
-        doc.setTextColor(138, 154, 135);
-        doc.text(data.bestFriend, panelW*3 + 10, panelH + 85);
-        
-        // TOP ROW - Add text upside down by positioning at bottom of panels
-        
-        // Panel 5 - Signatures Page 1 (Top Left) - upside down
-        doc.setTextColor(44, 62, 47);
-        doc.setFontSize(14);
-        doc.text('Friends', panelW/2, 70, { align: 'center' });
-        doc.text('Signatures', panelW/2, 85, { align: 'center' });
-        
-        // Signature lines
-        doc.setDrawColor(166, 180, 164);
-        doc.setLineWidth(0.3);
-        for (let i = 0; i < 5; i++) {
-          doc.line(10, 40 + (i * 12), panelW - 10, 40 + (i * 12));
-        }
-        
-        // Panel 6 - Signatures Page 2 (Top 2nd) - upside down
-        doc.setTextColor(44, 62, 47);
-        doc.setFontSize(14);
-        doc.text('More', panelW + panelW/2, 70, { align: 'center' });
-        doc.text('Signatures', panelW + panelW/2, 85, { align: 'center' });
-        
-        for (let i = 0; i < 5; i++) {
-          doc.line(panelW + 10, 40 + (i * 12), panelW*2 - 10, 40 + (i * 12));
-        }
-        
-        // Panel 7 - Messages (Top 3rd) - upside down
-        doc.setTextColor(44, 62, 47);
-        doc.setFontSize(14);
-        doc.text('Messages', panelW*2 + panelW/2, 60, { align: 'center' });
-        
-        // Message boxes
-        doc.setDrawColor(166, 180, 164);
-        doc.setFillColor(250, 250, 250);
-        doc.roundedRect(panelW*2 + 10, 25, panelW - 20, 15, 2, 2, 'FD');
-        doc.roundedRect(panelW*2 + 10, 45, panelW - 20, 15, 2, 2, 'FD');
-        doc.roundedRect(panelW*2 + 10, 65, panelW - 20, 15, 2, 2, 'FD');
-        
-        // Panel 8 - Back Cover (Top Right) - upside down
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(18);
-        doc.text('Braiswick', panelW*3 + panelW/2, 55, { align: 'center' });
-        doc.setFontSize(14);
-        doc.text(data.schoolYear, panelW*3 + panelW/2, 75, { align: 'center' });
-        doc.setFontSize(8);
-        doc.text('Scan for AR', panelW*3 + panelW/2, 95, { align: 'center' });
-        doc.text('memories', panelW*3 + panelW/2, 103, { align: 'center' });
-        
-        // Draw cut lines
+        // Add subtle cut guides (optional - you can remove these if you prefer)
         doc.setDrawColor(200, 200, 200);
-        doc.setLineWidth(0.2);
+        doc.setLineWidth(1);
         
-        // Vertical lines
+        // Vertical cut line (middle)
+        doc.line(1240, 0, 1240, 3508);
+        
+        // Horizontal cut lines
         for (let i = 1; i < 4; i++) {
-          doc.line(i * panelW, 0, i * panelW, 210);
+          doc.line(0, i * 877, 2480, i * 877);
         }
         
-        // Horizontal line
-        doc.line(0, panelH, 297, panelH);
-        
-        // Page numbers
-        doc.setFontSize(8);
+        // Add panel numbers for easy assembly (optional)
+        doc.setFontSize(20);
         doc.setTextColor(150, 150, 150);
         
-        // Bottom row page numbers
-        doc.text('1', 5, 205);
-        doc.text('2', panelW + 5, 205);
-        doc.text('3', panelW*2 + 5, 205);
-        doc.text('4', panelW*3 + 5, 205);
+        let panelNum = 1;
+        for (let row = 0; row < 4; row++) {
+          for (let col = 0; col < 2; col++) {
+            const x = col * 1240 + 50;
+            const y = row * 877 + 50;
+            doc.text(panelNum.toString(), x, y);
+            panelNum++;
+          }
+        }
         
-        // Top row page numbers
-        doc.text('5', 5, 15);
-        doc.text('6', panelW + 5, 15);
-        doc.text('7', panelW*2 + 5, 15);
-        doc.text('8', panelW*3 + 5, 15);
-        
-        // Instructions
-        doc.setFontSize(8);
+        // Add simple instructions
+        doc.setFontSize(24);
         doc.setTextColor(100, 100, 100);
-        doc.text('Cut along lines. Stack in order 1-8. Staple left edge.', 10, 25);
+        doc.text('www.braiswick.co.uk.', 200, 3400);
         
-        // Save
-        doc.save(`${data.studentName}_Memory_Booklet.pdf`);
+        // Save the PDF
+        doc.save(`${data.studentName}_Photo_Booklet.pdf`);
         
-        alert('PDF generated successfully!');
+        loadingEl.innerHTML = 'ready';
+        alert('PDF generated successfully! Your PDF will download automatically.');
         
       } catch (error) {
         console.error('PDF Error:', error);
-        alert('Error: ' + error.message);
+        loadingEl.innerHTML = 'error';
+        alert('Error generating PDF: ' + error.message);
       }
     }
     
