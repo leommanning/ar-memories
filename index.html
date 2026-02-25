@@ -12,7 +12,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   
   <style>
-    /* (keep all your existing styles - they're perfect) */
     * {
       margin: 0;
       padding: 0;
@@ -403,7 +402,7 @@
       transform: scale(1.1);
     }
     
-    /* Loading indicator */
+    /* Loading indicator - UPDATED with spinner */
     #loading {
       position: fixed;
       bottom: 30px;
@@ -413,6 +412,72 @@
       letter-spacing: 0.5px;
       z-index: 10000;
       text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid #ffffff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .loading-text {
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    /* PDF Loading Overlay */
+    #pdf-loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 20000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    #pdf-loading-overlay.active {
+      display: flex;
+    }
+    
+    .loading-circle {
+      width: 80px;
+      height: 80px;
+      border: 6px solid rgba(255, 255, 255, 0.2);
+      border-top: 6px solid #a6b4a4;
+      border-right: 6px solid #a6b4a4;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    .loading-message {
+      color: white;
+      font-size: 18px;
+      font-weight: 500;
+      text-align: center;
+    }
+    
+    .loading-submessage {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+      margin-top: 10px;
     }
     
     @keyframes pulse {
@@ -427,11 +492,19 @@
   </style>
 </head>
 <body>
-  <!-- All your existing HTML structure stays exactly the same -->
+  <!-- Splash Screen -->
   <div id="splash-screen">
     <img src="https://static.wixstatic.com/media/42e05c_12592fc2a93e4bf0b1e30417fc3a3694~mv2.png" alt="Braiswick" class="splash-logo">
   </div>
 
+  <!-- PDF Loading Overlay -->
+  <div id="pdf-loading-overlay">
+    <div class="loading-circle"></div>
+    <div class="loading-message">Creating your memory booklet...</div>
+    <div class="loading-submessage">This will only take a moment</div>
+  </div>
+
+  <!-- Camera Permission Prompt -->
   <div id="camera-prompt">
     <div class="camera-prompt-content">
       <img src="https://static.wixstatic.com/media/42e05c_12592fc2a93e4bf0b1e30417fc3a3694~mv2.png" alt="Braiswick" class="prompt-logo">
@@ -441,6 +514,7 @@
     </div>
   </div>
 
+  <!-- Download Button -->
   <div id="download-btn-container">
     <button class="download-btn" id="downloadBookletBtn">
       <span class="download-icon">📖</span>
@@ -448,6 +522,7 @@
     </button>
   </div>
 
+  <!-- Memory Card Modal -->
   <div id="memory-card-modal">
     <div class="memory-card-container" id="memoryCardContainer">
       <div class="memory-card" id="memoryCard">
@@ -484,7 +559,7 @@
     <button id="close-modal-btn">✕</button>
   </div>
 
-  <!-- AR Scene elements (keep all your existing a-scene tags) -->
+  <!-- AR Scene - Photo Target (photo.mind) -->
   <a-scene
     id="scene-photo"
     mindar-image="imageTargetSrc: ./photo.mind; autoStart: true; uiLoading: no; uiError: no; uiScanning: no;"
@@ -494,14 +569,22 @@
     vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: false"
     style="display: none;">
+    
     <a-camera id="camera-photo" position="0 0 0" look-controls="enabled: false"></a-camera>
+    
+    <!-- Photo Target -->
     <a-entity id="photo-target" mindar-image-target="targetIndex: 0">
-      <a-plane width="2.0" height="1.33" position="0 0.5 0" rotation="0 0 0" material="transparent: true; opacity: 0;"></a-plane>
+      <a-plane
+        width="2.0"
+        height="1.33"
+        position="0 0.5 0"
+        rotation="0 0 0"
+        material="transparent: true; opacity: 0;">
+      </a-plane>
     </a-entity>
   </a-scene>
 
-  <!-- ... (keep all other a-scene elements for image1, image2, image4) ... -->
-  
+  <!-- AR Scene - Image 1 Target (image1.mind) -->
   <a-scene
     id="scene-image1"
     mindar-image="imageTargetSrc: ./image1.mind; autoStart: true; uiLoading: no; uiError: no; uiScanning: no;"
@@ -511,12 +594,21 @@
     vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: false"
     style="display: none;">
+    
     <a-camera id="camera-image1" position="0 0 0" look-controls="enabled: false"></a-camera>
+    
     <a-entity id="image1-target" mindar-image-target="targetIndex: 0">
-      <a-plane width="2.0" height="1.33" position="0 0.5 0" rotation="0 0 0" material="transparent: true; opacity: 0;"></a-plane>
+      <a-plane
+        width="2.0"
+        height="1.33"
+        position="0 0.5 0"
+        rotation="0 0 0"
+        material="transparent: true; opacity: 0;">
+      </a-plane>
     </a-entity>
   </a-scene>
 
+  <!-- AR Scene - Image 2 Target (image2.mind) -->
   <a-scene
     id="scene-image2"
     mindar-image="imageTargetSrc: ./image2.mind; autoStart: true; uiLoading: no; uiError: no; uiScanning: no;"
@@ -526,12 +618,21 @@
     vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: false"
     style="display: none;">
+    
     <a-camera id="camera-image2" position="0 0 0" look-controls="enabled: false"></a-camera>
+    
     <a-entity id="image2-target" mindar-image-target="targetIndex: 0">
-      <a-plane width="2.0" height="1.33" position="0 0.5 0" rotation="0 0 0" material="transparent: true; opacity: 0;"></a-plane>
+      <a-plane
+        width="2.0"
+        height="1.33"
+        position="0 0.5 0"
+        rotation="0 0 0"
+        material="transparent: true; opacity: 0;">
+      </a-plane>
     </a-entity>
   </a-scene>
 
+  <!-- AR Scene - Image 4 Target (image4.mind) -->
   <a-scene
     id="scene-image4"
     mindar-image="imageTargetSrc: ./image4.mind; autoStart: true; uiLoading: no; uiError: no; uiScanning: no;"
@@ -541,29 +642,45 @@
     vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: false"
     style="display: none;">
+    
     <a-camera id="camera-image4" position="0 0 0" look-controls="enabled: false"></a-camera>
+    
     <a-entity id="image4-target" mindar-image-target="targetIndex: 0">
-      <a-plane width="2.0" height="1.33" position="0 0.5 0" rotation="0 0 0" material="transparent: true; opacity: 0;"></a-plane>
+      <a-plane
+        width="2.0"
+        height="1.33"
+        position="0 0.5 0"
+        rotation="0 0 0"
+        material="transparent: true; opacity: 0;">
+      </a-plane>
     </a-entity>
   </a-scene>
 
+  <!-- UI Overlay -->
   <div id="ui-overlay">
     <div class="scan-container">
       <div class="scan-box" id="scanBox"></div>
     </div>
   </div>
   
-  <div id="loading">initializing</div>
+  <!-- Loading indicator with spinner -->
+  <div id="loading">
+    <span class="spinner"></span>
+    <span class="loading-text" id="loading-text">initializing</span>
+  </div>
 
   <script>
-    // All your existing JavaScript setup (UI Elements, memoryData, etc.) stays exactly the same
     // UI Elements
     const splashScreen = document.getElementById('splash-screen');
     const scanBox = document.getElementById('scanBox');
     const loadingEl = document.getElementById('loading');
+    const loadingText = document.getElementById('loading-text');
     const cameraPrompt = document.getElementById('camera-prompt');
     const cameraButton = document.getElementById('camera-button');
     const permissionStatus = document.getElementById('permission-status');
+    
+    // PDF Loading Overlay
+    const pdfLoadingOverlay = document.getElementById('pdf-loading-overlay');
     
     // Memory Card Elements
     const memoryModal = document.getElementById('memory-card-modal');
@@ -678,7 +795,7 @@
           scene.classList.add('visible');
         });
         
-        loadingEl.innerHTML = 'scanning';
+        loadingText.innerHTML = 'scanning';
         
         return true;
         
@@ -779,7 +896,7 @@
     setupSceneListeners(image4Scene, 'image4');
     
     photoScene.addEventListener('loaded', () => {
-      loadingEl.innerHTML = 'ready';
+      loadingText.innerHTML = 'ready';
     });
     
     let sceneIndex = 0;
@@ -823,7 +940,7 @@
       }
     });
 
-    // ===== SIMPLIFIED PDF GENERATION USING YOUR JPG TEMPLATE =====
+    // ===== SIMPLIFIED PDF GENERATION WITH LOADING OVERLAY =====
     
     // Function to load image
     function loadImage(src) {
@@ -861,20 +978,28 @@
       });
     }
     
-    // PDF GENERATION - Using your JPG template
+    // PDF GENERATION with loading overlay
     async function generateBookletPDF() {
       try {
+        // Show loading overlay
+        pdfLoadingOverlay.classList.add('active');
+        
         // Get current student data
         const data = memoryData[currentTarget] || memoryData.photo;
         
-        // Show loading message
-        loadingEl.innerHTML = 'generating PDF...';
+        // Update loading message
+        document.querySelector('.loading-message').innerHTML = 'Creating your memory booklet...';
+        document.querySelector('.loading-submessage').innerHTML = 'Loading photos...';
         
         // Load the student photo
         const photoImg = await loadImage(data.portrait);
         
+        document.querySelector('.loading-submessage').innerHTML = 'Rotating image...';
+        
         // Rotate photo 90 degrees clockwise (as you requested)
         const rotatedPhoto = await rotateImage(photoImg);
+        
+        document.querySelector('.loading-submessage').innerHTML = 'Building PDF...';
         
         // Load your beautiful JPG template
         const templateImg = await loadImage('https://static.wixstatic.com/media/42e05c_f053990bf15d491cbaecd492cd2ba669~mv2.jpg');
@@ -897,11 +1022,12 @@
         photoCtx.drawImage(rotatedPhoto, 0, 0);
         const photoDataUrl = photoCanvas.toDataURL('image/jpeg', 0.95);
         
-        // Add the student photo at the exact coordinates you specified
-        // Left: 196px, Top: 1058px, Width: 634px, Height: 503px
+        // Add the student photo at the exact coordinates
         doc.addImage(photoDataUrl, 'JPEG', 196, 1058, 634, 503);
         
-        // Add subtle cut guides (optional - you can remove these if you prefer)
+        document.querySelector('.loading-submessage').innerHTML = 'Adding finishing touches...';
+        
+        // Add subtle cut guides
         doc.setDrawColor(200, 200, 200);
         doc.setLineWidth(1);
         
@@ -913,7 +1039,7 @@
           doc.line(0, i * 877, 2480, i * 877);
         }
         
-        // Add panel numbers for easy assembly (optional)
+        // Add panel numbers for easy assembly
         doc.setFontSize(20);
         doc.setTextColor(150, 150, 150);
         
@@ -930,17 +1056,19 @@
         // Add simple instructions
         doc.setFontSize(24);
         doc.setTextColor(100, 100, 100);
-        doc.text('www.braiswick.co.uk.', 200, 3400);
+        doc.text('Cut along lines. Stack 1-8. Staple left edge.', 200, 3400);
+        
+        document.querySelector('.loading-submessage').innerHTML = 'Saving PDF...';
         
         // Save the PDF
         doc.save(`${data.studentName}_Photo_Booklet.pdf`);
         
-        loadingEl.innerHTML = 'ready';
-        alert('PDF generated successfully! Your PDF will download automatically.');
+        // Hide loading overlay
+        pdfLoadingOverlay.classList.remove('active');
         
       } catch (error) {
         console.error('PDF Error:', error);
-        loadingEl.innerHTML = 'error';
+        pdfLoadingOverlay.classList.remove('active');
         alert('Error generating PDF: ' + error.message);
       }
     }
